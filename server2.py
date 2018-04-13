@@ -2,7 +2,7 @@ from multiprocessing import Process, Lock
 import socket
 import time
 
-TCP_IP = "127.0.0.1"
+TCP_IP = "192.168.253.253"
 TCP_PORT = 5005;
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -1,45 +1,47 @@
-from multiprocessing import Process, Lock
 import socket
 import time
 import random
+import sys
 
-mutex = Lock()
+TCP_IP = "127.0.0.1"
 
-def kiosk(kid):
-	with mutex:
-		TCP_IP1 = "127.0.0.1" # plays
-		TCP_IP2 = "127.0.0.2" # movies
+TCP_PORT1 = 5005 # movies
+TCP_PORT2 = 5008 # plays
 
-		# TCP_PORT = random.randint(5000, 10000)
-		TCP_PORT = 5005
+while True:
+	print("")
+	request = input("How can I help you? eg. movies,10. Type quit when no more user coming:\n")
+	if request == "quit":
+		print("No more user.")
+		break
 
-		# while True:
-		# 	print("A new user comes!")
+	input_list = request.split(',')
 
-		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	if input_list[0] != "movies" and input_list[0] != "plays":
+		print("No such type, try again.")
+		continue
 
-		while True:
-			request = input("How can I help you? eg. movies,10. Type quit to when no more user coming:\n")
-			if request == "quit":
-				print("No more user.")
-				break
+	print("Message received from the user.")
+	num = random.randint(1, 2)
+	if num == 1:
+		addr = (TCP_IP, TCP_PORT1)
+		a = 'movies'
+	else:
+		addr = (TCP_IP, TCP_PORT2)
+		a = 'plays'
 
-			print("Message received from the user.")
-			num = random.randint(1, 2)
-			if num == 1:
-				addr = (TCP_IP1, TCP_PORT)
-			else:
-				addr = (TCP_IP2, TCP_PORT)
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.connect(addr)
 
-			sock.connect(addr)
+	time.sleep(5)
+	sock.sendall(request.encode('utf-8') + ','.encode('utf-8') + str(sys.argv[1]).encode('utf-8'))
 
-			sock.sendall(request.encode('utf-8') + ",".encode('utf-8') + kid.encode('utf-8'))
-			print("Message sent to the server.")
-			response = sock.recv(1024)
+	print("Message sent to the server for " + a +".")
+	response = sock.recv(1024)
 
-			if response == "success":
-				print("Here are the tickets.")
-			else:
-				print("Sorry, no enough ticket.")
+	if response.decode('utf-8') == 'Thank you and here are your tickets.':
+		print("Here are the tickets.")
+	else:
+		print("Sorry, no enough ticket.")
 
-			sock.close()
+	sock.close()
